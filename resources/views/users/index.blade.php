@@ -25,7 +25,7 @@
                 @foreach ($users as $user)
                     <tr>
                         <td>{{ $loop->index + 1 }}</td>
-                        <td>{{ Str::ucfirst($user->name) }}</td>
+                        <td>{{ Str::lcfirst($user->name) }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->role_id }}</td>
                         <td>
