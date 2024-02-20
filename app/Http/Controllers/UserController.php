@@ -16,9 +16,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('users.index', [
-            'users' => User::get()
-        ]);
+        return User::all();
     }
 
     /**
@@ -26,8 +24,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
-        return view('users.create',compact('roles'));
+        // $roles = Role::all();
+        // return view('users.create',compact('roles'));
     }
 
     /**
@@ -38,19 +36,9 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required',
-            'role' => 'required',
             'password' => 'required'
         ]);
-
-        $User = new User;
-        $User->name = $request->name;
-        $User->email = $request->email;
-        $User->role_id = $request->role;
-        $User->password = $request->password;
-
-        $User->save();
-
-        return redirect()->to('/users');
+        return User::create($request->all());
     }
 
     /**
@@ -58,7 +46,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return User::find($id);
     }
 
     /**
@@ -76,21 +64,9 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required',
-            'role' => 'required'
-        ]);
-
-        $User = User::where('id', $id)->first();
-
-        $User->name = $request->name;
-        $User->email = $request->email;
-        $User->role_id = $request->role;
-
-        $User->save();
-
-        return back()->withSuccess('User Updated!!');
+       $user = User::find($id);
+       $user->update($request->all());
+       return $user;
     }
 
     /**
@@ -98,11 +74,6 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        $user = User::find($id);
-        if ($user->id == Auth::user()->id) {
-            return back()->with('error', 'You cannot delete your own account.');
-        }
-        $user->delete();
-           return back()->withSuccess('User Deleted!!');
+       return User::find($id)->delete();
     }
 }
