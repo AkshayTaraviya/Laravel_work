@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -7,44 +9,49 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomAuthController extends Controller
 {
-    public function register(Request $request){
-     $request->validate([
-        'name'=>'required',
-        'email'=>'required',
-        'password'=>'required',
-     ]);
-    
-     $user = User::create([
-        'name'=>$request->name,
-        'email'=>$request->email,
-        'password'=>Hash::make($request->password),
-     ]);
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+        ]);
 
-     return $user->createToken('mytoken')->plainTextToken;
-   }
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-   public function logout(){
-     auth()->user()->tokens()->delete();
-       return response([
-        'message' => 'Succefully Logged out!!'
-       ]);
-   }
+        return $user->createToken('mytoken')->plainTextToken;
+    }
 
-   public function login(Request $request){
-      $request->validate([
-        'email' => 'required',
-        'password' => 'required'
-      ]);
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required',
+            'password' => 'required'
+        ]);
 
-      $user = User::where('email',$request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-      if(!$user || !Hash::check($request->password,
-         $user->password)){
+        if (!$user || !Hash::check(
+            $request->password,
+            $user->password
+        )) {
             return response([
-              'message' => 'The provided credentials are incorrect.'
-            ],401);
-         }
+                'message' => 'Email and Password are incorrect.'
+            ], 401);
+        }
 
-         return $user->createToken('mytoken')->plainTextToken;
-   }
+        return $user->createToken('mytoken')->plainTextToken;
+    }
+
+    public function logout()
+    {
+        auth()->user()->tokens()->delete();
+        return response([
+            'message' => 'Succefully Logged out!!'
+        ]);
+    }
 }

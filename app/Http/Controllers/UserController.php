@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 
+use function PHPSTORM_META\map;
+
 class UserController extends Controller
 {
     /**
@@ -16,7 +18,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::all();
+        return response()->json([
+            'data'=>User::get(), 
+            'success'=>true,
+            'message'=>'user get successfully'
+        ]);
     }
 
     /**
@@ -38,7 +44,18 @@ class UserController extends Controller
             'email' => 'required',
             'password' => 'required'
         ]);
-        return User::create($request->all());
+
+        $user = new User;
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = $request->password;
+ 
+        $user->save();
+        return response()->json([ 
+            'data'=>$user,
+            'success'=>true,
+            'message'=>'User Created'
+        ]);
     }
 
     /**
@@ -46,7 +63,19 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return User::find($id);
+        $user = User::find($id);
+        if($user){
+            return response()->json([ 
+                'data'=>$user,
+                'success'=>true,
+            ]);
+        }else{
+            return response()->json([ 
+                'data'=>$user,
+                'success'=>false,
+                'message'=>'User Not found'
+            ]);
+        }
     }
 
     /**
@@ -64,9 +93,23 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-       $user = User::find($id);
-       $user->update($request->all());
-       return $user;
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required',
+        ]);
+
+        $user = User::where('id', $id)->first();
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        $user->save();
+
+        return response()->json([ 
+            'data'=>$user,
+            'success'=>true,
+            'message'=>'Update Successfully'
+        ]);
     }
 
     /**
@@ -74,6 +117,12 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-       return User::find($id)->delete();
+       $user = User::find($id);
+       $user->delete();
+       return response()->json([
+        'data'=>$user,
+        'message'=>'User Deleted'
+       ]);
     }
 }
+
