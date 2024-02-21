@@ -7,57 +7,44 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomAuthController extends Controller
 {
-    public function index()
-    {
-        return view('auth.login');
-    }
-    public function customLogin(Request $request)
-    {
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-        ]);
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            return redirect()->intended('/users');
-        }
-        return redirect("login")->withSuccess('Login details are not valid');
-    }
-    public function registration()
-    {
-        return view('auth.register');
-    }
-    public function customRegistration(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'role' => 'required',
-            'password' => 'required|min:6',
-        ]);
-        $data = $request->all();
-        $check = $this->create($data);
-        return redirect("login");
-    }
-    public function create(array $data)
-    {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'role' => $data['role'],
-            'password' => Hash::make($data['password'])
-        ]);
-    }
-    public function dashboard()
-    {
-        if (Auth::check()) {
-            return view('auth.dashboard');
-        }
-        return redirect("login")->withSuccess('You are not allowed to access');
-    }
-    public function signOut()
-    {
-        Auth::logout();
-        return Redirect('/dashboard');
-    }
+    public function register(Request $request){
+     $request->validate([
+        'name'=>'required',
+        'email'=>'required',
+        'password'=>'required',
+     ]);
+    
+     $user = User::create([
+        'name'=>$request->name,
+        'email'=>$request->email,
+        'password'=>Hash::make($request->password),
+     ]);
+
+     return $user->createToken('mytoken')->plainTextToken;
+   }
+
+   public function logout(){
+     auth()->user()->tokens()->delete();
+       return response([
+        'message' => 'Succefully Logged out!!'
+       ]);
+   }
+
+   public function login(Request $request){
+      $request->validate([
+        'email' => 'required',
+        'password' => 'required'
+      ]);
+
+      $user = User::where('email',$request->email)->first();
+
+      if(!$user || !Hash::check($request->password,
+         $user->password)){
+            return response([
+              'message' => 'The provided credentials are incorrect.'
+            ],401);
+         }
+
+         return $user->createToken('mytoken')->plainTextToken;
+   }
 }
